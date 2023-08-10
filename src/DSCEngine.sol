@@ -307,10 +307,33 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
+    /*
+     * @notice Returns the total DSC minted and the total collateral value in USD
+     * @param user The address of the user to get the account information for
+     * @return totalDscMinted The total DSC minted by the user
+     * @return collateralValueInUsd The total collateral value in USD
+     */
+    function _getAccountInformation(address user)
+        private
+        view
+        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
+    {
+        totalDscMinted = s_DSCMinted[user];
+        collateralValueInUsd = getAccountCollateralValue(user);
+    }
+
     //////////////////////////////////////
     // Public & External View Functions //
     //              Getters             //
     //////////////////////////////////////
+
+    function calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+        external
+        pure
+        returns (uint256)
+    {
+        return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
+    }
 
     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256 tokenAmount) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]); //get value(pricefeed) of the token
@@ -338,18 +361,43 @@ contract DSCEngine is ReentrancyGuard {
         return _healthFactor(user);
     }
 
-    /*
-     * @notice Returns the total DSC minted and the total collateral value in USD
-     * @param user The address of the user to get the account information for
-     * @return totalDscMinted The total DSC minted by the user
-     * @return collateralValueInUsd The total collateral value in USD
-     */
-    function _getAccountInformation(address user)
-        private
+    function getAccountInformation(address user)
+        external
         view
         returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
     {
-        totalDscMinted = s_DSCMinted[user];
-        collateralValueInUsd = getAccountCollateralValue(user);
+        (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
+    }
+
+    function getAdditionalFeedPrecision() public pure returns (uint256) {
+        return ADDITIONAL_FEED_PRECISION;
+    }
+
+    function getPrecision() public pure returns (uint256) {
+        return PRECISION;
+    }
+
+    function getLiquidationBonus() public pure returns (uint256) {
+        return LIQUIDATION_BONUS;
+    }
+
+    function getMinHealthFactor() external pure returns (uint256) {
+        return MIN_HEALTH_FACTOR;
+    }
+
+    function getCollateralTokens() external view returns (address[] memory) {
+        return s_collateralTokens;
+    }
+
+    function getLiquidationThreshold() external pure returns (uint256) {
+        return LIQUIDATION_THRESHOLD;
+    }
+
+    function getDsc() external view returns (address) {
+        return address(i_dsc);
+    }
+
+    function getCollateralTokenPriceFeed(address token) external view returns (address) {
+        return s_priceFeeds[token];
     }
 }
