@@ -15,7 +15,9 @@ import {MockMoreDebtDSC} from "../mocks/MockMoreDebtDSC.sol";
 pragma solidity ^0.8.18;
 
 contract DSCEngineTest is StdCheats, Test {
-    event CollateralRedeemed(address indexed redeemFrom, address indexed redeemTo, address token, uint256 amount); // if redeemFrom != redeemedTo, then it was liquidated
+    event CollateralRedeemed(
+        address indexed redeemFrom, address indexed redeemTo, address indexed token, uint256 amount
+    ); // if redeemFrom != redeemedTo, then it was liquidated
 
     DeployDSC deployer;
     DecentralizedStableCoin dsc;
